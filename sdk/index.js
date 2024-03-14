@@ -41,11 +41,7 @@ export function encrypt(question1, answer1, question2, answer2, question3, answe
   return plaintext
 }
 
-export function secure_encrypt(question1, answer1, question2, answer2, question3, answer3, password, base64PubKey) {
-  let plaintext = encrypt(question1, answer1, question2, answer2, question3, answer3, password)
-  if (!base64PubKey) {
-    throw new Error("base64PubKey must not be empty")
-  }
+export function secure_encrypt(plaintext, base64PubKey) {
   // encrypt the plaintext
   let ciphertext = ecies(
     Buffer.from(base64PubKey, "base64").toString("hex"),

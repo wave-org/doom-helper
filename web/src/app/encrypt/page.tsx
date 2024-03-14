@@ -115,30 +115,18 @@ export default function Home() {
     }
     try {
       // doom-cipher encrypt
-      setPlaintext(
-        encrypt(
-          question1,
-          answer1,
-          question2,
-          answer2,
-          question3,
-          answer3,
-          userPassword
-        )
+      let plaintext = encrypt(
+        question1,
+        answer1,
+        question2,
+        answer2,
+        question3,
+        answer3,
+        userPassword
       );
+      setPlaintext(plaintext);
       // doom-cipher secure_encrypt
-      setCiphertext(
-        secure_encrypt(
-          question1,
-          answer1,
-          question2,
-          answer2,
-          question3,
-          answer3,
-          userPassword,
-          publickKey
-        )
-      );
+      setCiphertext(secure_encrypt(plaintext, publickKey));
     } catch (err) {
       setErrorToast((err as Error).message);
       return;
