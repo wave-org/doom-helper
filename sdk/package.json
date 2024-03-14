@@ -1,0 +1,20 @@
+{
+  "name": "doom-cipher",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@stablelib/random": "^1.0.2",
+    "@stablelib/xchacha20poly1305": "^1.0.1",
+    "@types/node": "^20.11.27",
+    "eciesjs": "^0.4.6",
+    "keccak256": "^1.0.6",
+    "typescript": "^5.4.2"
+  }
+}
