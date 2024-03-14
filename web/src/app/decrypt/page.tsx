@@ -8,8 +8,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
 import shared from "../shared";
-import keccak256 from "keccak256";
-import { XChaCha20Poly1305 } from "@stablelib/xchacha20poly1305";
+import { decrypt } from "doom-cipher";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -86,9 +85,6 @@ export default function Home() {
   const [userPassword, setUserPassword] = React.useState("");
 
   const [plaintext, setPlaintext] = React.useState("");
-  const [encryptedPassword, setEncryptedPassword] = React.useState("");
-  const [hashOfHash, setHashOfHash] = React.useState("");
-  const [nonce, setNonce] = React.useState("");
 
   const doCommit = () => {
     if (!plaintext) {
@@ -107,16 +103,13 @@ export default function Home() {
       setErrorToast("invalid plaintext");
       return;
     }
-    setInvalidPlaintext(true);
+    setValidPlaintext(true);
     setQuestion1(plaintextObj.question1);
     setQuestion2(plaintextObj.question2);
     setQuestion3(plaintextObj.question3);
-    setEncryptedPassword(plaintextObj.encryptedPassword);
-    setHashOfHash(plaintextObj.hashOfHash);
-    setNonce(plaintextObj.nonce);
   };
 
-  const [invalidPlaintext, setInvalidPlaintext] = React.useState(false);
+  const [validPlaintext, setValidPlaintext] = React.useState(false);
 
   const doDecrypt = () => {
     if (
@@ -130,25 +123,11 @@ export default function Home() {
       setErrorToast("have empty question or answer");
       return;
     }
-    // hash answers
-    let answerHash = keccak256(
-      answer1.toLowerCase() + answer2.toLowerCase() + answer3.toLowerCase()
-    ).toString("hex");
-    if (hashOfHash != keccak256(answerHash).toString("hex")) {
-      setErrorToast("hashOfHashs not equal");
-      return;
-    }
-    let aead = new XChaCha20Poly1305(
-      new Uint8Array(Buffer.from(answerHash, "utf-8")).slice(0, 32)
-    );
-    let password = aead.open(
-      Buffer.from(nonce, "base64"),
-      Buffer.from(encryptedPassword, "base64")
-    );
-    if (password) {
-      setUserPassword(Buffer.from(password).toString());
-    } else {
-      setErrorToast("decrypt password fail");
+    try {
+      // doom-cipher encrypt
+      setUserPassword(decrypt(answer1, answer2, answer3, plaintext));
+    } catch (err) {
+      setErrorToast((err as Error).message);
       return;
     }
   };
@@ -259,7 +238,7 @@ export default function Home() {
             Commit
           </Button>
         </Stack>
-        {invalidPlaintext && (
+        {validPlaintext && (
           <>
             <Stack direction="row" textAlign="center" justifyContent="left">
               <Typography variant="h6" gutterBottom>

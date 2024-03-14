@@ -8,10 +8,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
 import shared from "../shared";
-import keccak256 from "keccak256";
-import { encrypt } from "eciesjs";
-import { XChaCha20Poly1305 } from "@stablelib/xchacha20poly1305";
-import { randomBytes } from "@stablelib/random";
+import { encrypt, secure_encrypt } from "doom-cipher";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -73,6 +70,19 @@ export default function Home() {
     await handleHttpRequest(path, method, reqData, respHandle, respDataHandle);
   };
 
+  const copyToClipboard = (text: string) => {
+    if (document.execCommand("copy")) {
+      let input = document.createElement("textarea");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+    } else if (navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    }
+  };
+
   const [publickKey, setPublicKey] = React.useState("");
 
   const [toast, setToast] = React.useState("");
@@ -103,32 +113,36 @@ export default function Home() {
       setErrorToast("have empty question, answer or user password");
       return;
     }
-    // hash answers
-    let answerHash = keccak256(
-      answer1.toLowerCase() + answer2.toLowerCase() + answer3.toLowerCase()
-    ).toString("hex");
-    let nonce = randomBytes(24);
-    let aead = new XChaCha20Poly1305(
-      new Uint8Array(Buffer.from(answerHash, "utf-8")).slice(0, 32)
-    );
-    let encryptedPassword = Buffer.from(
-      aead.seal(nonce, new Uint8Array(Buffer.from(userPassword, "utf-8")))
-    ).toString("base64");
-    let hashOfHash = keccak256(answerHash).toString("hex");
-    let plaintext = JSON.stringify({
-      question1,
-      question2,
-      question3,
-      encryptedPassword,
-      hashOfHash,
-      nonce: Buffer.from(nonce).toString("base64"),
-    });
-    setPlaintext(plaintext);
-    let ciphertext = encrypt(
-      publickKey,
-      Buffer.from(Buffer.from(plaintext).toString("base64"))
-    ).toString("base64");
-    setCiphertext(ciphertext);
+    try {
+      // doom-cipher encrypt
+      setPlaintext(
+        encrypt(
+          question1,
+          answer1,
+          question2,
+          answer2,
+          question3,
+          answer3,
+          userPassword
+        )
+      );
+      // doom-cipher secure_encrypt
+      setCiphertext(
+        secure_encrypt(
+          question1,
+          answer1,
+          question2,
+          answer2,
+          question3,
+          answer3,
+          userPassword,
+          publickKey
+        )
+      );
+    } catch (err) {
+      setErrorToast((err as Error).message);
+      return;
+    }
   };
 
   useEffect(() => {
@@ -165,9 +179,7 @@ export default function Home() {
                 );
                 return;
               }
-              setPublicKey(
-                Buffer.from(respData.data.publicKey, "base64").toString("hex")
-              );
+              setPublicKey(respData.data.publicKey);
             }
           );
           return;
@@ -192,9 +204,7 @@ export default function Home() {
               );
               return;
             }
-            setPublicKey(
-              Buffer.from(respData.data.publicKey, "base64").toString("hex")
-            );
+            setPublicKey(respData.data.publicKey);
           }
         );
       }
@@ -347,7 +357,7 @@ export default function Home() {
             size="large"
             sx={{ marginLeft: "20px" }}
             onClick={() => {
-              navigator.clipboard.writeText(plaintext);
+              copyToClipboard(plaintext);
             }}
           >
             Copy
@@ -373,7 +383,7 @@ export default function Home() {
             variant="contained"
             size="large"
             onClick={() => {
-              navigator.clipboard.writeText(ciphertext);
+              copyToClipboard(ciphertext);
             }}
             sx={{ marginLeft: "20px" }}
           >
