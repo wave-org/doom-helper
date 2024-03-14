@@ -1,0 +1,54 @@
+pipeline {
+    agent {
+        label 'test'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh """
+                    docker build \
+                        --build-arg env=test \
+                        -t nextsurfer/doom-helper:latest \
+                        -f ./web/Dockerfile ./web
+                    docker stop doom-helper && docker rm doom-helper || echo 0
+                    docker run -d \
+                        --name doom-helper \
+                        --dns ${HOST_IP} \
+                        --dns 8.8.8.8 \
+                        -p 10010:3000 \
+                        nextsurfer/doom-helper:latest
+                """
+            }
+        }
+    }
+    post {
+        success {
+            sh """
+                echo 'build success'
+            """
+        }
+        failure {
+            sh """
+                echo 'feature build fail'
+                git checkout dev
+                docker build \
+                    --build-arg env=test \
+                    -t nextsurfer/doom-helper:latest \
+                    -f ./web/Dockerfile ./web
+                docker stop doom-helper && docker rm doom-helper || echo 0
+                docker run -d \
+                    --name doom-helper \
+                    --dns ${HOST_IP} \
+                    --dns 8.8.8.8 \
+                    -p 10010:3000 \
+                    nextsurfer/doom-helper:latest
+            """
+        }
+        cleanup {
+            sh """
+                docker system prune -f
+            """
+            cleanWs()
+        }
+    }
+}
