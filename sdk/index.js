@@ -3,37 +3,24 @@ import { encrypt as ecies } from "eciesjs";
 import { XChaCha20Poly1305 } from "@stablelib/xchacha20poly1305";
 import { randomBytes } from "@stablelib/random";
 
-export function encrypt(question1, answer1, question2, answer2, question3, answer3, password) {
-  if (
-    !question1 ||
-    !answer1 ||
-    !question2 ||
-    !answer2 ||
-    !question3 ||
-    !answer3 ||
-    !password
-  ) {
-    throw new Error("all parameters must not be empty")
-  }
-  // hash answers
-  let answerHash = keccak256(
-    answer1.toLowerCase() + answer2.toLowerCase() + answer3.toLowerCase()
+export function encrypt(chachakey, password, preObject) {
+  // hash chachakey
+  let chachakeyHash = keccak256(
+    chachakey
   ).toString("hex");
   // encrypt the password
   let nonce = randomBytes(24);
   let aead = new XChaCha20Poly1305(
-    new Uint8Array(Buffer.from(answerHash, "utf-8")).slice(0, 32)
+    new Uint8Array(Buffer.from(chachakeyHash, "utf-8")).slice(0, 32)
   );
   let encryptedPassword = Buffer.from(
     aead.seal(nonce, new Uint8Array(Buffer.from(password, "utf-8")))
   ).toString("base64");
-  // hash the answer hash
-  let hashOfHash = keccak256(answerHash).toString("hex");
+  // hash the chachakey hash
+  let hashOfHash = keccak256(chachakeyHash).toString("hex");
   // plaintext
   let plaintext = JSON.stringify({
-    question1,
-    question2,
-    question3,
+    ...preObject,
     encryptedPassword,
     hashOfHash,
     nonce: Buffer.from(nonce).toString("base64"),
@@ -50,38 +37,27 @@ export function secure_encrypt(plaintext, base64PubKey) {
   return ciphertext
 }
 
-export function decrypt(answer1, answer2, answer3, plaintext) {
-  if (
-    !answer1 ||
-    !answer2 ||
-    !answer3 ||
-    !plaintext
-  ) {
-    throw new Error("all parameters must not be empty")
-  }
+export function decrypt(chachakey, plaintext) {
   // parse plaintext
   let plaintextObj = JSON.parse(plaintext);
   if (
-    !plaintextObj.question1 ||
-    !plaintextObj.question2 ||
-    !plaintextObj.question3 ||
     !plaintextObj.encryptedPassword ||
     !plaintextObj.hashOfHash ||
     !plaintextObj.nonce
   ) {
     throw new Error("deformed plaintext")
   }
-  // hash answers
-  let answerHash = keccak256(
-    answer1.toLowerCase() + answer2.toLowerCase() + answer3.toLowerCase()
+  // hash chachakey
+  let chachakeyHash = keccak256(
+    chachakey
   ).toString("hex");
   // validate hashOfHash
-  if (plaintextObj.hashOfHash != keccak256(answerHash).toString("hex")) {
+  if (plaintextObj.hashOfHash != keccak256(chachakeyHash).toString("hex")) {
     throw new Error("invalid plaintext")
   }
   // decrypt 
   let aead = new XChaCha20Poly1305(
-    new Uint8Array(Buffer.from(answerHash, "utf-8")).slice(0, 32)
+    new Uint8Array(Buffer.from(chachakeyHash, "utf-8")).slice(0, 32)
   );
   let password = aead.open(
     Buffer.from(plaintextObj.nonce, "base64"),
