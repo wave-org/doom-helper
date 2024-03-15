@@ -199,13 +199,13 @@ export default function Home() {
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="subtitle2" gutterBottom>
-            Result:
+            Private Key:
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <TextField
             id="outlined-basic"
-            label="Result"
+            label="Private Key"
             variant="outlined"
             fullWidth
             multiline

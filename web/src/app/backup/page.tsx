@@ -324,6 +324,16 @@ export default function Home() {
               {passwordInputHelperText}
             </FormHelperText>
           </FormControl>
+          <Button
+            variant="contained"
+            size="large"
+            sx={{ marginLeft: "20px" }}
+            onClick={() => {
+              copyToClipboard(password);
+            }}
+          >
+            Copy
+          </Button>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
