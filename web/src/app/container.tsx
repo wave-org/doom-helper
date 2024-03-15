@@ -12,20 +12,16 @@ import Tab from "@mui/material/Tab";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { usePathname, useRouter } from "next/navigation";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import shared from "./shared";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Snackbar, { SnackbarOrigin } from "@mui/material/Snackbar";
+import { usePathname } from "next/navigation";
+import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 const LINKS = [
+  { text: "Simple Encrypt", href: "/simple-encrypt" },
   { text: "Encrypt", href: "/encrypt" },
   { text: "Decrypt", href: "/decrypt" },
-  { text: "Simple Encrypt", href: "/simple-encrypt" },
+  { text: "Backup", href: "/backup" },
+  { text: "Recovery", href: "/recovery" },
 ];
 
 function Container({ children }: { children: React.ReactNode }) {

@@ -125,7 +125,12 @@ export default function Home() {
     }
     try {
       // doom-cipher encrypt
-      setUserPassword(decrypt(answer1, answer2, answer3, plaintext));
+      setUserPassword(
+        decrypt(
+          answer1.toLowerCase() + answer2.toLowerCase() + answer3.toLowerCase(),
+          plaintext
+        )
+      );
     } catch (err) {
       setErrorToast((err as Error).message);
       return;

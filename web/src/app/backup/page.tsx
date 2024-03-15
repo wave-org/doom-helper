@@ -9,6 +9,16 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
 import shared from "../shared";
 import { encrypt, secure_encrypt } from "doom-cipher";
+import moment from "moment";
+import keccak256 from "keccak256";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -88,45 +98,71 @@ export default function Home() {
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
 
-  const [question1, setQuestion1] = React.useState("");
-  const [answer1, setAnswer1] = React.useState("");
-  const [question2, setQuestion2] = React.useState("");
-  const [answer2, setAnswer2] = React.useState("");
-  const [question3, setQuestion3] = React.useState("");
-  const [answer3, setAnswer3] = React.useState("");
+  const [privateKey, setPrivateKey] = React.useState("");
+  const [privKeyInputError, setPrivKeyInputError] = React.useState(false);
+  const [privKeyInputHelperText, setPrivKeyInputHelperText] =
+    React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [passwordInputError, setPasswordInputError] = React.useState(false);
+  const [passwordInputHelperText, setPasswordInputHelperText] =
+    React.useState("");
 
-  const [userPassword, setUserPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
 
   const [plaintext, setPlaintext] = React.useState("");
   const [ciphertext, setCiphertext] = React.useState("");
 
-  const doEncrypt = () => {
-    if (
-      !question1 ||
-      !answer1 ||
-      !question2 ||
-      !answer2 ||
-      !question3 ||
-      !answer3 ||
-      !userPassword
-    ) {
-      setErrorToast("have empty question, answer or user password");
+  const doBackup = () => {
+    if (!privateKey || !password) {
+      setErrorToast("private key and password must not be empty");
       return;
+    } else {
+      if (privateKey.length != 64) {
+        setErrorToast(
+          "private key must be base 16 with lower-case letters, and its length must be 64 ( now is " +
+            privateKey.length +
+            ")"
+        );
+        return;
+      } else if (password.length < 8 || password.length > 64) {
+        setErrorToast(
+          "password length must between 8 and 64 ( now is " +
+            password.length +
+            ")"
+        );
+        return;
+      }
     }
     try {
       // doom-cipher encrypt
-      let plaintext = encrypt(
-        answer1.toLowerCase() + answer2.toLowerCase() + answer3.toLowerCase(),
-        userPassword,
-        { question1, question2, question3 }
-      );
+      let plaintext = encrypt(password, privateKey, null);
       setPlaintext(plaintext);
-      // doom-cipher secure_encrypt  using doom-001 public key
+      // doom-cipher secure_encrypt using doom-001 public key
       setCiphertext(secure_encrypt(plaintext, publickKey));
     } catch (err) {
       setErrorToast((err as Error).message);
       return;
     }
+  };
+
+  const generateRandomPassword = () => {
+    const array = new Uint32Array(32);
+    crypto.getRandomValues(array);
+    return keccak256(
+      Buffer.from(array).toString() +
+        moment().format("x") +
+        "f8f8a2f43c8376ccb0871305060d7b27b0554d2cc72bccf41b27056084114514"
+    )
+      .slice(0, 32)
+      .toString("hex");
   };
 
   useEffect(() => {
@@ -200,107 +236,98 @@ export default function Home() {
       <Stack marginX="200px" marginTop="50px" spacing={2}>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 1: Enter Three Questions With Answers
+            Step 1: Enter Private Key
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <TextField
             id="outlined-basic"
-            label="Question One"
+            label="Private Key"
             variant="outlined"
+            error={privKeyInputError}
+            helperText={privKeyInputHelperText}
             fullWidth
-            multiline
-            rows={2}
+            value={privateKey}
             onChange={(e) => {
-              setQuestion1(e.target.value);
-            }}
-          />
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="Answer One"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={2}
-            onChange={(e) => {
-              setAnswer1(e.target.value);
-            }}
-          />
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="Question Two"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={2}
-            onChange={(e) => {
-              setQuestion2(e.target.value);
-            }}
-          />
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="Answer Two"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={2}
-            onChange={(e) => {
-              setAnswer2(e.target.value);
-            }}
-          />
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="Question Three"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={2}
-            onChange={(e) => {
-              setQuestion3(e.target.value);
-            }}
-          />
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="Answer Three"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={2}
-            onChange={(e) => {
-              setAnswer3(e.target.value);
+              setPrivateKey(e.target.value);
+              if (e.target.value.length != 64) {
+                setPrivKeyInputError(true);
+                setPrivKeyInputHelperText(
+                  "private key must be base 16 with lower-case letters, and its length must be 64 ( now is " +
+                    e.target.value.length +
+                    ")"
+                );
+              } else {
+                setPrivKeyInputError(false);
+                setPrivKeyInputHelperText("");
+              }
             }}
           />
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 2: Enter Your Password
+            Step 2: Enter Password
           </Typography>
+          <Button
+            variant="contained"
+            size="medium"
+            sx={{ marginLeft: "20px" }}
+            onClick={() => {
+              setPassword(generateRandomPassword());
+              setPasswordInputError(false);
+              setPasswordInputHelperText("");
+            }}
+          >
+            Generate A Random Password
+          </Button>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="Password"
-            variant="outlined"
-            type="password"
-            fullWidth
-            onChange={(e) => {
-              setUserPassword(e.target.value);
-            }}
-          />
+          <FormControl fullWidth sx={{ m: 1 }} variant="outlined">
+            <InputLabel htmlFor="outlined-adornment-password">
+              Password
+            </InputLabel>
+            <OutlinedInput
+              id="outlined-adornment-password"
+              type={showPassword ? "text" : "password"}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Password"
+              error={passwordInputError}
+              fullWidth
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (e.target.value.length < 8 || e.target.value.length > 64) {
+                  setPasswordInputError(true);
+                  setPasswordInputHelperText(
+                    "password length must between 8 and 64 ( now is " +
+                      e.target.value.length +
+                      ")"
+                  );
+                } else {
+                  setPasswordInputError(false);
+                  setPasswordInputHelperText("");
+                }
+              }}
+            />
+            <FormHelperText id="password-error-text">
+              {passwordInputHelperText}
+            </FormHelperText>
+          </FormControl>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 3: Confirm Encrypting
+            Step 3: Confirm Backup
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
@@ -309,7 +336,7 @@ export default function Home() {
             size="large"
             fullWidth
             onClick={() => {
-              doEncrypt();
+              doBackup();
             }}
           >
             Confirm
