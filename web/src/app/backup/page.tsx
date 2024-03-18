@@ -16,6 +16,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
+import * as clipboard from "clipboard-polyfill";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -78,16 +79,7 @@ export default function Home() {
   };
 
   const copyToClipboard = (text: string) => {
-    if (document.execCommand("copy")) {
-      let input = document.createElement("textarea");
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("copy");
-      document.body.removeChild(input);
-    } else if (navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text);
-    }
+    clipboard.writeText(text);
   };
 
   const [publickKey, setPublicKey] = React.useState(
