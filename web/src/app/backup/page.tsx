@@ -7,10 +7,7 @@ import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
-import shared from "../shared";
-import { encrypt, secure_encrypt } from "doom-cipher";
-import moment from "moment";
-import keccak256 from "keccak256";
+import { encrypt, secure_encrypt, generateRandomPassword } from "doom-cipher";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
@@ -93,7 +90,9 @@ export default function Home() {
     }
   };
 
-  const [publickKey, setPublicKey] = React.useState("");
+  const [publickKey, setPublicKey] = React.useState(
+    "BCVWGZ0Uqvfj+jHiD4ZExi79BBq523HyUu6+y2xNiKHHi4Xp/A5SM5Dldi3cvT3lONmoOIgb6mtGchEX/CkdZL8="
+  );
 
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
@@ -152,84 +151,6 @@ export default function Home() {
       return;
     }
   };
-
-  const generateRandomPassword = () => {
-    const array = new Uint32Array(32);
-    crypto.getRandomValues(array);
-    return keccak256(
-      Buffer.from(array).toString() +
-        moment().format("x") +
-        "f8f8a2f43c8376ccb0871305060d7b27b0554d2cc72bccf41b27056084114514"
-    )
-      .slice(0, 32)
-      .toString("hex");
-  };
-
-  useEffect(() => {
-    // check whether doom-001 key is existing
-    syncRequest(
-      shared.kongAddress + "/connector/checkKeyExisting/v1",
-      "POST",
-      {
-        apiKey: shared.apiKey,
-        keyID: shared.doomWebKeyID,
-      },
-      undefined,
-      (chunk: any) => {
-        const respData = JSON.parse(chunk);
-        // create a new one if not exist
-        if (respData.code !== 0 || !respData.data.existing) {
-          syncRequest(
-            shared.kongAddress + "/connector/createPrivateKey/v1",
-            "POST",
-            {
-              apiKey: shared.apiKey,
-              keyID: shared.doomWebKeyID,
-            },
-            undefined,
-            (chunk: any) => {
-              const respData = JSON.parse(chunk);
-              if (respData.code !== 0) {
-                setErrorToast("create new password fail");
-                return;
-              }
-              if (!respData.data.publicKey) {
-                setErrorToast(
-                  "create new password fail: returned public key is empty"
-                );
-                return;
-              }
-              setPublicKey(respData.data.publicKey);
-            }
-          );
-          return;
-        }
-        syncRequest(
-          shared.kongAddress + "/connector/getPublicKey/v1",
-          "POST",
-          {
-            apiKey: shared.apiKey,
-            keyID: shared.doomWebKeyID,
-          },
-          undefined,
-          (chunk: any) => {
-            const respData = JSON.parse(chunk);
-            if (respData.code !== 0) {
-              setErrorToast("get public key fail");
-              return;
-            }
-            if (!respData.data.publicKey) {
-              setErrorToast(
-                "get public key fail: returned public key is empty"
-              );
-              return;
-            }
-            setPublicKey(respData.data.publicKey);
-          }
-        );
-      }
-    );
-  }, []);
 
   return (
     <main>

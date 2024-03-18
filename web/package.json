@@ -35,7 +35,7 @@
     "@stablelib/random": "^1.0.2",
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "crypto-js": "^4.2.0",
-    "doom-cipher": "^1.0.7",
+    "doom-cipher": "^1.0.8",
     "eciesjs": "^0.4.6",
     "keccak256": "^1.0.6",
     "moment": "^2.30.1"

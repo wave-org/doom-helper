@@ -2,6 +2,7 @@ import keccak256 from "keccak256";
 import { encrypt as ecies } from "eciesjs";
 import { XChaCha20Poly1305 } from "@stablelib/xchacha20poly1305";
 import { randomBytes } from "@stablelib/random";
+import moment from "moment";
 
 export function encrypt(chachakey, password, preObject) {
   // hash chachakey
@@ -69,3 +70,15 @@ export function decrypt(chachakey, plaintext) {
     return "null"
   }
 }
+
+export function generateRandomPassword() {
+  const array = new Uint32Array(32);
+  crypto.getRandomValues(array);
+  return keccak256(
+    Buffer.from(array).toString() +
+      moment().format("x") +
+      "f8f8a2f43c8376ccb0871305060d7b27b0554d2cc72bccf41b27056084114514"
+  )
+    .slice(0, 32)
+    .toString("hex");
+};
