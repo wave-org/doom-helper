@@ -9,6 +9,7 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
 import shared from "../shared";
 import { decrypt } from "doom-cipher";
+import * as clipboard from "clipboard-polyfill";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -85,6 +86,10 @@ export default function Home() {
   const [userPassword, setUserPassword] = React.useState("");
 
   const [plaintext, setPlaintext] = React.useState("");
+
+  const copyToClipboard = (text: string) => {
+    clipboard.writeText(text);
+  };
 
   const doCommit = () => {
     if (!plaintext) {
@@ -348,9 +353,26 @@ export default function Home() {
               </Typography>
             </Stack>
             <Stack direction="row" textAlign="center" justifyContent="left">
-              <Typography variant="subtitle2" gutterBottom>
-                Password: {userPassword}
-              </Typography>
+              <TextField
+                id="outlined-basic"
+                label="Password"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={2}
+                value={userPassword}
+                disabled
+              />
+              <Button
+                variant="contained"
+                size="large"
+                sx={{ marginLeft: "20px" }}
+                onClick={() => {
+                  copyToClipboard(userPassword);
+                }}
+              >
+                Copy
+              </Button>
             </Stack>
           </>
         )}

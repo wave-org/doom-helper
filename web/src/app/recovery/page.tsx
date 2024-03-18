@@ -16,6 +16,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import * as clipboard from "clipboard-polyfill";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -108,16 +109,7 @@ export default function Home() {
   };
 
   const copyToClipboard = (text: string) => {
-    if (document.execCommand("copy")) {
-      let input = document.createElement("textarea");
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("copy");
-      document.body.removeChild(input);
-    } else if (navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text);
-    }
+    clipboard.writeText(text);
   };
 
   useEffect(() => {}, []);
@@ -218,7 +210,7 @@ export default function Home() {
             size="large"
             sx={{ marginLeft: "20px" }}
             onClick={() => {
-              copyToClipboard(plaintext);
+              copyToClipboard(result);
             }}
           >
             Copy
