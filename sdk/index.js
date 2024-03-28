@@ -29,10 +29,10 @@ export function encrypt(chachakey, password, preObject) {
   return plaintext
 }
 
-export function secure_encrypt(plaintext, base64PubKey) {
+export function secure_encrypt(plaintext, hexPubKey) {
   // encrypt the plaintext
   let ciphertext = ecies(
-    Buffer.from(base64PubKey, "base64").toString("hex"),
+    hexPubKey,
     Buffer.from(Buffer.from(plaintext).toString("base64"))
   ).toString("base64");
   return ciphertext

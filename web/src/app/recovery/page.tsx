@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -111,8 +111,6 @@ export default function Home() {
   const copyToClipboard = (text: string) => {
     clipboard.writeText(text);
   };
-
-  useEffect(() => {}, []);
 
   return (
     <main>
