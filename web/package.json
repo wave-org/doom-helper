@@ -36,7 +36,7 @@
     "@stablelib/xchacha20poly1305": "^1.0.1",
     "clipboard-polyfill": "^4.0.2",
     "crypto-js": "^4.2.0",
-    "doom-cipher": "^1.0.8",
+    "doom-cipher": "^1.0.9",
     "eciesjs": "^0.4.6",
     "keccak256": "^1.0.6",
     "moment": "^2.30.1"

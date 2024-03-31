@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -71,8 +71,6 @@ export default function Home() {
     await handleHttpRequest(path, method, reqData, respHandle, respDataHandle);
   };
 
-  const [publickKey, setPublicKey] = React.useState("");
-
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
 
@@ -141,76 +139,6 @@ export default function Home() {
       return;
     }
   };
-
-  useEffect(() => {
-    // check whether doom-001 key is existing
-    syncRequest(
-      shared.kongAddress + "/connector/checkKeyExisting/v1",
-      "POST",
-      {
-        apiKey: shared.apiKey,
-        keyID: shared.doomWebKeyID,
-      },
-      undefined,
-      (chunk: any) => {
-        const respData = JSON.parse(chunk);
-        // create a new one if not exist
-        if (respData.code !== 0 || !respData.data.existing) {
-          syncRequest(
-            shared.kongAddress + "/connector/createPrivateKey/v1",
-            "POST",
-            {
-              apiKey: shared.apiKey,
-              keyID: shared.doomWebKeyID,
-            },
-            undefined,
-            (chunk: any) => {
-              const respData = JSON.parse(chunk);
-              if (respData.code !== 0) {
-                setErrorToast("create new password fail");
-                return;
-              }
-              if (!respData.data.publicKey) {
-                setErrorToast(
-                  "create new password fail: returned public key is empty"
-                );
-                return;
-              }
-              setPublicKey(
-                Buffer.from(respData.data.publicKey, "base64").toString("hex")
-              );
-            }
-          );
-          return;
-        }
-        syncRequest(
-          shared.kongAddress + "/connector/getPublicKey/v1",
-          "POST",
-          {
-            apiKey: shared.apiKey,
-            keyID: shared.doomWebKeyID,
-          },
-          undefined,
-          (chunk: any) => {
-            const respData = JSON.parse(chunk);
-            if (respData.code !== 0) {
-              setErrorToast("get public key fail");
-              return;
-            }
-            if (!respData.data.publicKey) {
-              setErrorToast(
-                "get public key fail: returned public key is empty"
-              );
-              return;
-            }
-            setPublicKey(
-              Buffer.from(respData.data.publicKey, "base64").toString("hex")
-            );
-          }
-        );
-      }
-    );
-  }, []);
 
   return (
     <main>
