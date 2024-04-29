@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import { request, IncomingMessage, RequestOptions } from "http";
+import QRCode from "qrcode";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -16,62 +16,67 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 });
 
 export default function Home() {
-  const handleHttpRequest = (
-    path: string,
-    method: string,
-    reqData?: any,
-    respHandle?: (response: IncomingMessage) => void,
-    respDataHandle?: (chunk: any) => void
-  ) => {
-    return new Promise((resolve: any, reject: any) => {
-      const reqOpts: RequestOptions = {
-        path,
-        method,
-      };
-      let postData = null;
-      if (reqData) {
-        postData = JSON.stringify(reqData);
-        reqOpts.headers = {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
-        };
-      }
-      const req = request(reqOpts, (res) => {
-        res.setEncoding("utf8");
-        if (respDataHandle) {
-          res.on("data", respDataHandle);
-        }
-        res.on("end", () => {
-          resolve();
-        });
-      });
-      if (respHandle) {
-        req.on("response", respHandle);
-      }
-      req.on("error", (e) => {
-        reject(e);
-      });
-      if (postData) {
-        req.write(postData);
-      }
-      req.end();
-    });
-  };
-
-  const syncRequest = async (
-    path: string,
-    method: string,
-    reqData?: any,
-    respHandle?: (response: IncomingMessage) => void,
-    respDataHandle?: (chunk: any) => void
-  ) => {
-    await handleHttpRequest(path, method, reqData, respHandle, respDataHandle);
-  };
-
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
-
   const [abiJson, setAbiJson] = React.useState("");
+
+  const [qrDataLen, setQrDataLen] = React.useState(400);
+  const [showInterval, setShowInterval] = React.useState(0.4 * 1000);
+  const [b64Data, setB64Data] = React.useState("");
+  const [qrData, setQrData] = React.useState("");
+  const timerRef = React.useRef<NodeJS.Timer | null>(null);
+
+  const doGenerate = async () => {
+    if (abiJson.length <= 0) {
+      return;
+    }
+    let json: any[] = [];
+    JSON.parse(abiJson).forEach((abi: any) => {
+      if (
+        abi.type === "function" &&
+        abi.stateMutability !== "view" &&
+        abi.stateMutability !== "pure"
+      ) {
+        abi.outputs = [];
+        json.push(abi);
+      }
+    });
+    if (json.length == 0) {
+      setErrorToast("abi json array length is empty");
+      return;
+    }
+    let b64data = btoa(JSON.stringify(json));
+    console.log("b64data.length ==>", b64data.length);
+    setB64Data(b64data);
+    let arr: string[] = [];
+    for (let f = 0; f < b64data.length; ) {
+      let l = f + qrDataLen;
+      if (l > b64data.length) {
+        l = b64data.length;
+      }
+      arr.push(b64data.slice(f, l));
+      f = l;
+    }
+    // clear previous interval timer
+    clearInterval(timerRef.current as NodeJS.Timer);
+    timerRef.current = null;
+    // set new interval timer
+    let canvas = document.getElementById("qrcode");
+    let a = 0;
+    let b = arr.length;
+    timerRef.current = setInterval(() => {
+      if (a == b) {
+        a = 0;
+      }
+      let prefix = "DOOM|AQR|" + a + "/" + b + "|";
+      setQrData(prefix + arr[a]);
+      console.log("prefix ==>", prefix);
+      QRCode.toCanvas(canvas, prefix + arr[a], { width: 300 }, (err: any) => {
+        if (err) setErrorToast(err);
+      });
+      a++;
+    }, showInterval);
+  };
 
   return (
     <main>
@@ -88,8 +93,10 @@ export default function Home() {
             variant="outlined"
             fullWidth
             multiline
-            minRows="10"
-            onChange={(e) => {}}
+            rows={10}
+            onChange={(e) => {
+              setAbiJson(e.target.value);
+            }}
           />
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
@@ -98,7 +105,14 @@ export default function Home() {
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
-          <Button variant="contained" size="large" fullWidth onClick={() => {}}>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={() => {
+              doGenerate();
+            }}
+          >
             Confirm
           </Button>
         </Stack>
@@ -106,6 +120,33 @@ export default function Home() {
           <Typography variant="h6" gutterBottom>
             Step 3: Results
           </Typography>
+        </Stack>
+        {/* <Stack direction="row" textAlign="center" justifyContent="left">
+          <TextField
+            id="outlined-basic"
+            label="b64Data"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={10}
+            disabled
+            value={b64Data}
+          />
+        </Stack>
+        <Stack direction="row" textAlign="center" justifyContent="left">
+          <TextField
+            id="outlined-basic"
+            label="qrData"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={10}
+            disabled
+            value={qrData}
+          />
+        </Stack> */}
+        <Stack direction="row" textAlign="center" justifyContent="left">
+          <canvas id="qrcode"></canvas>
         </Stack>
       </Stack>
       <Snackbar
