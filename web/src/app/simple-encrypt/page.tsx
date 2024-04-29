@@ -69,7 +69,9 @@ export default function Home() {
     await handleHttpRequest(path, method, reqData, respHandle, respDataHandle);
   };
 
-  const [publickKey, setPublicKey] = React.useState("");
+  const [publickKey, setPublicKey] = React.useState(
+    "04f79adeb44446b0a5c4cd82d97d23ce2682abe776bc2236c56607233d068c338833a2b35e4fdcb4018ce474604a1bea123d5aa56125ed1727fba6b4ef0e81914c"
+  );
 
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
