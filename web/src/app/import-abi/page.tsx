@@ -7,7 +7,6 @@ import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
-import { encrypt } from "eciesjs";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -69,55 +68,37 @@ export default function Home() {
     await handleHttpRequest(path, method, reqData, respHandle, respDataHandle);
   };
 
-  const [publickKey, setPublicKey] = React.useState("");
-
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
 
-  const [plaintext, setPlaintext] = React.useState("");
-  const [ciphertext, setCiphertext] = React.useState("");
-
-  const doEncrypt = () => {
-    let ciphertext = encrypt(
-      publickKey,
-      Buffer.from(Buffer.from(plaintext, "utf-8").toString("base64"))
-    ).toString("base64");
-    setCiphertext(ciphertext);
-  };
+  const [abiJson, setAbiJson] = React.useState("");
 
   return (
     <main>
       <Stack marginX="200px" marginTop="50px" spacing={2}>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 1: Enter Something
+            Step 1: Enter ABI Json Object
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <TextField
             id="outlined-basic"
-            label="Plaintext"
+            label="ABI Json"
             variant="outlined"
             fullWidth
-            onChange={(e) => {
-              setPlaintext(e.target.value);
-            }}
+            multiline
+            minRows="10"
+            onChange={(e) => {}}
           />
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 2: Confirm Encrypting
+            Step 2: Confirm To Generate QRCodes
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
-          <Button
-            variant="contained"
-            size="large"
-            fullWidth
-            onClick={() => {
-              doEncrypt();
-            }}
-          >
+          <Button variant="contained" size="large" fullWidth onClick={() => {}}>
             Confirm
           </Button>
         </Stack>
@@ -125,18 +106,6 @@ export default function Home() {
           <Typography variant="h6" gutterBottom>
             Step 3: Results
           </Typography>
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="CipherText"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={2}
-            value={ciphertext}
-            disabled
-          />
         </Stack>
       </Stack>
       <Snackbar

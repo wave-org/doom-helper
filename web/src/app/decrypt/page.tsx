@@ -7,7 +7,6 @@ import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { request, IncomingMessage, RequestOptions } from "http";
-import shared from "../shared";
 import { decrypt } from "doom-cipher";
 import * as clipboard from "clipboard-polyfill";
 
