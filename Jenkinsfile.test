@@ -12,6 +12,7 @@ pipeline {
                         -f ./web/Dockerfile ./web
                     docker stop doom-helper && docker rm doom-helper || echo 0
                     docker run -d \
+                        --restart always \
                         --name doom-helper \
                         --dns ${HOST_IP} \
                         --dns 8.8.8.8 \
@@ -37,6 +38,7 @@ pipeline {
                     -f ./web/Dockerfile ./web
                 docker stop doom-helper && docker rm doom-helper || echo 0
                 docker run -d \
+                    --restart always \
                     --name doom-helper \
                     --dns ${HOST_IP} \
                     --dns 8.8.8.8 \
