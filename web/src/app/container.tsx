@@ -22,6 +22,7 @@ const LINKS = [
   { text: "Decrypt", href: "/decrypt" },
   { text: "Backup", href: "/backup" },
   { text: "Recovery", href: "/recovery" },
+  { text: "Token", href: "/token" },
   { text: "Import ABI", href: "/import-abi" },
 ];
 
