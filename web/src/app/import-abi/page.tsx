@@ -6,8 +6,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import { request, IncomingMessage, RequestOptions } from "http";
-import { encrypt } from "eciesjs";
+import QRCode from "qrcode";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -17,74 +16,66 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 });
 
 export default function Home() {
-  const handleHttpRequest = (
-    path: string,
-    method: string,
-    reqData?: any,
-    respHandle?: (response: IncomingMessage) => void,
-    respDataHandle?: (chunk: any) => void
-  ) => {
-    return new Promise((resolve: any, reject: any) => {
-      const reqOpts: RequestOptions = {
-        path,
-        method,
-      };
-      let postData = null;
-      if (reqData) {
-        postData = JSON.stringify(reqData);
-        reqOpts.headers = {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
-        };
-      }
-      const req = request(reqOpts, (res) => {
-        res.setEncoding("utf8");
-        if (respDataHandle) {
-          res.on("data", respDataHandle);
-        }
-        res.on("end", () => {
-          resolve();
-        });
-      });
-      if (respHandle) {
-        req.on("response", respHandle);
-      }
-      req.on("error", (e) => {
-        reject(e);
-      });
-      if (postData) {
-        req.write(postData);
-      }
-      req.end();
-    });
-  };
-
-  const syncRequest = async (
-    path: string,
-    method: string,
-    reqData?: any,
-    respHandle?: (response: IncomingMessage) => void,
-    respDataHandle?: (chunk: any) => void
-  ) => {
-    await handleHttpRequest(path, method, reqData, respHandle, respDataHandle);
-  };
-
-  const [publickKey, setPublicKey] = React.useState(
-    "04f79adeb44446b0a5c4cd82d97d23ce2682abe776bc2236c56607233d068c338833a2b35e4fdcb4018ce474604a1bea123d5aa56125ed1727fba6b4ef0e81914c"
-  );
-
   const [toast, setToast] = React.useState("");
   const [errorToast, setErrorToast] = React.useState("");
+  const [abiJson, setAbiJson] = React.useState("");
 
-  const [plaintext, setPlaintext] = React.useState("");
-  const [ciphertext, setCiphertext] = React.useState("");
+  const [qrDataLen, setQrDataLen] = React.useState(400);
+  const [showInterval, setShowInterval] = React.useState(0.4 * 1000);
+  const [b64Data, setB64Data] = React.useState("");
+  const [qrData, setQrData] = React.useState("");
+  const timerRef = React.useRef<NodeJS.Timer | null>(null);
 
-  const doEncrypt = () => {
-    let ciphertext = encrypt(
-      publickKey,
-      Buffer.from(Buffer.from(plaintext, "utf-8").toString("base64"))
-    ).toString("base64");
-    setCiphertext(ciphertext);
+  const doGenerate = async () => {
+    if (abiJson.length <= 0) {
+      return;
+    }
+    let json: any[] = [];
+    JSON.parse(abiJson).forEach((abi: any) => {
+      if (
+        abi.type === "function" &&
+        abi.stateMutability !== "view" &&
+        abi.stateMutability !== "pure"
+      ) {
+        abi.outputs = [];
+        json.push(abi);
+      }
+    });
+    if (json.length == 0) {
+      setErrorToast("abi json array length is empty");
+      return;
+    }
+    let b64data = btoa(JSON.stringify(json));
+    console.log("b64data.length ==>", b64data.length);
+    setB64Data(b64data);
+    let arr: string[] = [];
+    for (let f = 0; f < b64data.length; ) {
+      let l = f + qrDataLen;
+      if (l > b64data.length) {
+        l = b64data.length;
+      }
+      arr.push(b64data.slice(f, l));
+      f = l;
+    }
+    // clear previous interval timer
+    clearInterval(timerRef.current as NodeJS.Timer);
+    timerRef.current = null;
+    // set new interval timer
+    let canvas = document.getElementById("qrcode");
+    let a = 0;
+    let b = arr.length;
+    timerRef.current = setInterval(() => {
+      if (a == b) {
+        a = 0;
+      }
+      let prefix = "DOOM|AQR|" + a + "/" + b + "|";
+      setQrData(prefix + arr[a]);
+      console.log("prefix ==>", prefix);
+      QRCode.toCanvas(canvas, prefix + arr[a], { width: 300 }, (err: any) => {
+        if (err) setErrorToast(err);
+      });
+      a++;
+    }, showInterval);
   };
 
   return (
@@ -92,23 +83,25 @@ export default function Home() {
       <Stack marginX="200px" marginTop="50px" spacing={2}>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 1: Enter Something
+            Step 1: Enter ABI Json Object
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <TextField
             id="outlined-basic"
-            label="Plaintext"
+            label="ABI Json"
             variant="outlined"
             fullWidth
+            multiline
+            rows={10}
             onChange={(e) => {
-              setPlaintext(e.target.value);
+              setAbiJson(e.target.value);
             }}
           />
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
           <Typography variant="h6" gutterBottom>
-            Step 2: Confirm Encrypting
+            Step 2: Confirm To Generate QRCodes
           </Typography>
         </Stack>
         <Stack direction="row" textAlign="center" justifyContent="left">
@@ -117,7 +110,7 @@ export default function Home() {
             size="large"
             fullWidth
             onClick={() => {
-              doEncrypt();
+              doGenerate();
             }}
           >
             Confirm
@@ -128,17 +121,32 @@ export default function Home() {
             Step 3: Results
           </Typography>
         </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
+        {/* <Stack direction="row" textAlign="center" justifyContent="left">
           <TextField
             id="outlined-basic"
-            label="CipherText"
+            label="b64Data"
             variant="outlined"
             fullWidth
             multiline
-            rows={2}
-            value={ciphertext}
+            rows={10}
             disabled
+            value={b64Data}
           />
+        </Stack>
+        <Stack direction="row" textAlign="center" justifyContent="left">
+          <TextField
+            id="outlined-basic"
+            label="qrData"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={10}
+            disabled
+            value={qrData}
+          />
+        </Stack> */}
+        <Stack direction="row" textAlign="center" justifyContent="left">
+          <canvas id="qrcode"></canvas>
         </Stack>
       </Stack>
       <Snackbar
