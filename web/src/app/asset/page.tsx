@@ -22,6 +22,7 @@ import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { debounce } from 'lodash';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -155,9 +156,7 @@ export default function Home() {
           <Button
             variant="contained"
             sx={{ height: "50px", width: "100px", margin: "5px" }}
-            onClick={() => {
-              doSearch();
-            }}
+            onClick={debounce(doSearch, 10000, {'leading': true, 'trailing': false})}
           >
             Refresh
           </Button>

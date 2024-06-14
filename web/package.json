@@ -23,6 +23,7 @@
     "dayjs": "^1.11.10",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
+    "lodash": "^4.17.21",
     "mui-file-input": "^3.0.0",
     "next": "13.4.12",
     "postcss": "8.4.27",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@stablelib/random": "^1.0.2",
     "@stablelib/xchacha20poly1305": "^1.0.1",
+    "@types/lodash": "^4.17.5",
     "@types/qrcode": "^1.5.5",
     "clipboard-polyfill": "^4.0.2",
     "crypto-js": "^4.2.0",
