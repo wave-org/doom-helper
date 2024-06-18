@@ -22,8 +22,9 @@ const LINKS = [
   { text: "Decrypt", href: "/decrypt" },
   { text: "Backup", href: "/backup" },
   { text: "Recovery", href: "/recovery" },
-  { text: "Token", href: "/token" },
   { text: "Import ABI", href: "/import-abi" },
+  { text: "Token", href: "/token" },
+  { text: "Asset", href: "/asset" },
 ];
 
 function Container({ children }: { children: React.ReactNode }) {

@@ -20,6 +20,9 @@ import FormControl from '@mui/material/FormControl';
 import moment from "moment";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { debounce } from 'lodash';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -37,8 +40,10 @@ interface Column {
 }
 
 const columns: readonly Column[] = [
-  { id: "symbol", label: "Symbol", minWidth: 100 },
+  { id: "token", label: "Token", minWidth: 100 },
+  { id: "amount", label: "Amount", minWidth: 100 },
   { id: "price", label: "Price", minWidth: 100 },
+  { id: "value", label: "Value", minWidth: 100 },
 ];
 
 export default function Home() {
@@ -102,46 +107,32 @@ export default function Home() {
     }
   };
 
-  const [baseCoin, setBaseCoin] = React.useState('USDT');
-  const handleBaseCoinChange = (event: SelectChangeEvent) => {
-    setBaseCoin(event.target.value as string);
+  const [chain, setChain] = React.useState('ethereum');
+  const handleChainChange = (event: SelectChangeEvent) => {
+    setChain(event.target.value as string);
   };
-  const baseCoinList = ["USD", "USDT"]
-
-  const [tokens, setTokens] = React.useState<string[]>([
-    "BTC",
-    "ETH",
-    "BNB",
-  ]);
+  const baseCoinList = ["ethereum"]
+  const [address, setAddress] = React.useState('');
   const list = React.useRef<any[]>([]);
+  const [totalValue, setTotalValue] = React.useState('');
 
-  const doRefresh = async () => {
-    let localList: any[] = [];
-    for (let i = 0; i < tokens.length; i++) {
-      post(
-        '/doom/getLatestSpotPrice/v1', 
-        {
-          symbol:tokens[i],
-          baseCoin: baseCoin,
-        },
-        (respData)=>{
-          if (respData.code != 0) {
-            setErrorToast(respData.message);
-            return
-          }
-          localList.push({
-            symbol: tokens[i]+"/"+baseCoin,
-            price: respData.data.price,
-          });
+  const doSearch = async () => {
+    post(
+      '/doom/getAssets/v1', 
+      {
+        address:address,
+        chain: chain,
+      },
+      (respData)=>{
+        if (respData.code != 0) {
+          setErrorToast(respData.message);
+          return
         }
-      )
-    }
-    list.current = localList;
+        list.current = respData.data.assets;
+        setTotalValue(respData.data.totalValue);
+      }
+    )
   };
-
-  useEffect(()=>{
-    doRefresh();
-  }, []);
 
   return (
     <main>
@@ -165,9 +156,7 @@ export default function Home() {
           <Button
             variant="contained"
             sx={{ height: "50px", width: "100px", margin: "5px" }}
-            onClick={() => {
-              doRefresh();
-            }}
+            onClick={debounce(doSearch, 10000, {'leading': true, 'trailing': false})}
           >
             Refresh
           </Button>
@@ -176,18 +165,34 @@ export default function Home() {
               width: "15%",
             }}
           >
-            <InputLabel id="demo-simple-select-label">Base Coin</InputLabel>
+            <InputLabel id="demo-simple-select-label">Chain</InputLabel>
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={baseCoin}
-              label="Base Coin"
-              onChange={handleBaseCoinChange}
+              value={chain}
+              label="Chain"
+              onChange={handleChainChange}
             >
               {baseCoinList && baseCoinList.map((item)=>(
                 <MenuItem value={item} key={item}>{item}</MenuItem>
               ))}
             </Select>
+          </FormControl>
+          <FormControl 
+            sx={{
+              width: "15%",
+            }}
+          >
+            <TextField id="outlined-basic" label="Address" variant="outlined" onChange={(e)=>{setAddress(e.target.value)}} />
+          </FormControl>
+          <FormControl 
+            sx={{
+              width: "15%",
+            }}
+          >
+             <Typography variant="h6" gutterBottom>
+              Total Value: ${totalValue}
+            </Typography>
           </FormControl>
         </Stack>
         <Stack
@@ -229,7 +234,7 @@ export default function Home() {
                                 .format("YYYY-MM-DD HH:mm:ss")}
                             </TableCell>
                           );
-                        } else if (column.id == "price") {
+                        } else if (column.id == "price" || column.id == "value") {
                           return (
                             <TableCell key={column.id} align={column.align}>
                               ${value}
