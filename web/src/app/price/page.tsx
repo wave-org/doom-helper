@@ -190,6 +190,7 @@ export default function Home() {
     newPage: number
   ) => {
     setPageNumber(newPage);
+    getPriceList();
   };
 
   const handleChangeRowsPerPage = (
@@ -197,6 +198,7 @@ export default function Home() {
   ) => {
     setPageSize(parseInt(event.target.value, 10));
     setPageNumber(0);
+    getPriceList();
   };
 
   return (
@@ -332,6 +334,12 @@ export default function Home() {
                               {moment(value)
                                 .local()
                                 .format("YYYY-MM-DD HH:mm:ss")}
+                            </TableCell>
+                          );
+                        } else if (column.id == "price" || column.id == "priceMiin" || column.id == "priceMax" || column.id == "priceAvg") {
+                          return (
+                            <TableCell key={column.id} align={column.align}>
+                              ${value}
                             </TableCell>
                           );
                         } else {
