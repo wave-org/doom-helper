@@ -114,7 +114,7 @@ export default function Home() {
   };
   const priceTypeList = ["Secondly", "Hourly", "Daily"]
 
-  const getPriceList = async () => {
+  const getPriceList = async (pageSize:number, pageNumber:number) => {
     const reqData = {
       beginMilli: beginMilli,
       endMilli: endMilli,
@@ -190,15 +190,16 @@ export default function Home() {
     newPage: number
   ) => {
     setPageNumber(newPage);
-    getPriceList();
+    getPriceList(pageSize, newPage);
   };
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setPageSize(parseInt(event.target.value, 10));
+    let ps = parseInt(event.target.value, 10);
+    setPageSize(ps);
     setPageNumber(0);
-    getPriceList();
+    getPriceList(ps, 0);
   };
 
   return (
@@ -221,7 +222,7 @@ export default function Home() {
       >
         <Button
           onClick={() => {
-            getPriceList();
+            getPriceList(pageSize, pageNumber);
           }}
           variant="contained"
           sx={{ height: "50px", width: "100px", margin: "5px" }}
