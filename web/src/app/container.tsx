@@ -25,6 +25,7 @@ const LINKS = [
   { text: "Import ABI", href: "/import-abi" },
   { text: "Token", href: "/token" },
   { text: "Asset", href: "/asset" },
+  { text: "Price", href: "/price" },
 ];
 
 function Container({ children }: { children: React.ReactNode }) {
