@@ -113,7 +113,7 @@ export default function Home() {
   };
   const baseCoinList = ["ethereum"]
   const [address, setAddress] = React.useState('');
-  const list = React.useRef<any[]>([]);
+  const [list, setList] = React.useState<any[]>([]);
   const [totalValue, setTotalValue] = React.useState('');
 
   const doSearch = async () => {
@@ -128,8 +128,8 @@ export default function Home() {
           setErrorToast(respData.message);
           return
         }
-        list.current = respData.data.assets;
-        setTotalValue(respData.data.totalValue);
+        setList(respData.data.tokenAsset.assets);
+        setTotalValue(respData.data.tokenAsset.totalValue);
       }
     )
   };
@@ -221,7 +221,7 @@ export default function Home() {
               </TableHead>
               <TableBody>
               {list &&
-                list.current.map((row) => {
+                list.map((row) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                       {columns.map((column) => {
