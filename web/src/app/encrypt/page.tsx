@@ -1,14 +1,14 @@
-"use client";
-import React from "react";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import { request, IncomingMessage, RequestOptions } from "http";
-import { encrypt, secure_encrypt } from "doom-cipher";
-import * as clipboard from "clipboard-polyfill";
+'use client';
+import React from 'react';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { request, IncomingMessage, RequestOptions } from 'http';
+import { encrypt, secure_encrypt } from 'doom-cipher';
+import * as clipboard from 'clipboard-polyfill';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -34,23 +34,23 @@ export default function Home() {
       if (reqData) {
         postData = JSON.stringify(reqData);
         reqOpts.headers = {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
         };
       }
       const req = request(reqOpts, (res) => {
-        res.setEncoding("utf8");
+        res.setEncoding('utf8');
         if (respDataHandle) {
-          res.on("data", respDataHandle);
+          res.on('data', respDataHandle);
         }
-        res.on("end", () => {
+        res.on('end', () => {
           resolve();
         });
       });
       if (respHandle) {
-        req.on("response", respHandle);
+        req.on('response', respHandle);
       }
-      req.on("error", (e) => {
+      req.on('error', (e) => {
         reject(e);
       });
       if (postData) {
@@ -75,23 +75,23 @@ export default function Home() {
   };
 
   const [publickKey, setPublicKey] = React.useState(
-    "04f79adeb44446b0a5c4cd82d97d23ce2682abe776bc2236c56607233d068c338833a2b35e4fdcb4018ce474604a1bea123d5aa56125ed1727fba6b4ef0e81914c"
+    '04f79adeb44446b0a5c4cd82d97d23ce2682abe776bc2236c56607233d068c338833a2b35e4fdcb4018ce474604a1bea123d5aa56125ed1727fba6b4ef0e81914c'
   );
 
-  const [toast, setToast] = React.useState("");
-  const [errorToast, setErrorToast] = React.useState("");
+  const [toast, setToast] = React.useState('');
+  const [errorToast, setErrorToast] = React.useState('');
 
-  const [question1, setQuestion1] = React.useState("");
-  const [answer1, setAnswer1] = React.useState("");
-  const [question2, setQuestion2] = React.useState("");
-  const [answer2, setAnswer2] = React.useState("");
-  const [question3, setQuestion3] = React.useState("");
-  const [answer3, setAnswer3] = React.useState("");
+  const [question1, setQuestion1] = React.useState('');
+  const [answer1, setAnswer1] = React.useState('');
+  const [question2, setQuestion2] = React.useState('');
+  const [answer2, setAnswer2] = React.useState('');
+  const [question3, setQuestion3] = React.useState('');
+  const [answer3, setAnswer3] = React.useState('');
 
-  const [userPassword, setUserPassword] = React.useState("");
+  const [userPassword, setUserPassword] = React.useState('');
 
-  const [plaintext, setPlaintext] = React.useState("");
-  const [ciphertext, setCiphertext] = React.useState("");
+  const [plaintext, setPlaintext] = React.useState('');
+  const [ciphertext, setCiphertext] = React.useState('');
 
   const doEncrypt = () => {
     if (
@@ -103,7 +103,7 @@ export default function Home() {
       !answer3 ||
       !userPassword
     ) {
-      setErrorToast("have empty question, answer or user password");
+      setErrorToast('have empty question, answer or user password');
       return;
     }
     try {
@@ -266,7 +266,7 @@ export default function Home() {
           <Button
             variant="contained"
             size="large"
-            sx={{ marginLeft: "20px" }}
+            sx={{ marginLeft: '20px' }}
             onClick={() => {
               copyToClipboard(plaintext);
             }}
@@ -296,36 +296,36 @@ export default function Home() {
             onClick={() => {
               copyToClipboard(ciphertext);
             }}
-            sx={{ marginLeft: "20px" }}
+            sx={{ marginLeft: '20px' }}
           >
             Copy
           </Button>
         </Stack>
       </Stack>
       <Snackbar
-        open={errorToast !== ""}
+        open={errorToast !== ''}
         autoHideDuration={5000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setErrorToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setErrorToast('')}
       >
         <Alert
-          onClose={() => setErrorToast("")}
+          onClose={() => setErrorToast('')}
           severity="error"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {errorToast}
         </Alert>
       </Snackbar>
       <Snackbar
-        open={toast !== ""}
+        open={toast !== ''}
         autoHideDuration={4500}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setToast('')}
       >
         <Alert
-          onClose={() => setToast("")}
+          onClose={() => setToast('')}
           severity="success"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {toast}
         </Alert>

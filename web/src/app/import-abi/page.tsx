@@ -1,12 +1,12 @@
-"use client";
-import React from "react";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import QRCode from "qrcode";
+'use client';
+import React from 'react';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import QRCode from 'qrcode';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -16,14 +16,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 });
 
 export default function Home() {
-  const [toast, setToast] = React.useState("");
-  const [errorToast, setErrorToast] = React.useState("");
-  const [abiJson, setAbiJson] = React.useState("");
+  const [toast, setToast] = React.useState('');
+  const [errorToast, setErrorToast] = React.useState('');
+  const [abiJson, setAbiJson] = React.useState('');
 
   const [qrDataLen, setQrDataLen] = React.useState(400);
   const [showInterval, setShowInterval] = React.useState(0.4 * 1000);
-  const [b64Data, setB64Data] = React.useState("");
-  const [qrData, setQrData] = React.useState("");
+  const [b64Data, setB64Data] = React.useState('');
+  const [qrData, setQrData] = React.useState('');
   const timerRef = React.useRef<NodeJS.Timer | null>(null);
 
   const doGenerate = async () => {
@@ -33,20 +33,20 @@ export default function Home() {
     let json: any[] = [];
     JSON.parse(abiJson).forEach((abi: any) => {
       if (
-        abi.type === "function" &&
-        abi.stateMutability !== "view" &&
-        abi.stateMutability !== "pure"
+        abi.type === 'function' &&
+        abi.stateMutability !== 'view' &&
+        abi.stateMutability !== 'pure'
       ) {
         abi.outputs = [];
         json.push(abi);
       }
     });
     if (json.length == 0) {
-      setErrorToast("abi json array length is empty");
+      setErrorToast('abi json array length is empty');
       return;
     }
     let b64data = btoa(JSON.stringify(json));
-    console.log("b64data.length ==>", b64data.length);
+    console.log('b64data.length ==>', b64data.length);
     setB64Data(b64data);
     let arr: string[] = [];
     for (let f = 0; f < b64data.length; ) {
@@ -61,16 +61,16 @@ export default function Home() {
     clearInterval(timerRef.current as NodeJS.Timer);
     timerRef.current = null;
     // set new interval timer
-    let canvas = document.getElementById("qrcode");
+    let canvas = document.getElementById('qrcode');
     let a = 0;
     let b = arr.length;
     timerRef.current = setInterval(() => {
       if (a == b) {
         a = 0;
       }
-      let prefix = "DOOM|AQR|" + a + "/" + b + "|";
+      let prefix = 'DOOM|AQR|' + a + '/' + b + '|';
       setQrData(prefix + arr[a]);
-      console.log("prefix ==>", prefix);
+      console.log('prefix ==>', prefix);
       QRCode.toCanvas(canvas, prefix + arr[a], { width: 300 }, (err: any) => {
         if (err) setErrorToast(err);
       });
@@ -150,29 +150,29 @@ export default function Home() {
         </Stack>
       </Stack>
       <Snackbar
-        open={errorToast !== ""}
+        open={errorToast !== ''}
         autoHideDuration={5000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setErrorToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setErrorToast('')}
       >
         <Alert
-          onClose={() => setErrorToast("")}
+          onClose={() => setErrorToast('')}
           severity="error"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {errorToast}
         </Alert>
       </Snackbar>
       <Snackbar
-        open={toast !== ""}
+        open={toast !== ''}
         autoHideDuration={4500}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setToast('')}
       >
         <Alert
-          onClose={() => setToast("")}
+          onClose={() => setToast('')}
           severity="success"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {toast}
         </Alert>

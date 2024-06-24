@@ -1,25 +1,25 @@
-"use client";
-import React, { useEffect } from "react";
-import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import shared from "../shared";
-import { request, IncomingMessage, RequestOptions } from "http";
+'use client';
+import React, { useEffect } from 'react';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import shared from '../shared';
+import { request, IncomingMessage, RequestOptions } from 'http';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import moment from "moment";
-import Backdrop from "@mui/material/Backdrop";
-import CircularProgress from "@mui/material/CircularProgress";
+import moment from 'moment';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { debounce } from 'lodash';
@@ -35,21 +35,21 @@ interface Column {
   id: string;
   label: string;
   minWidth?: number;
-  align?: "right";
+  align?: 'right';
   format?: (value: number) => string;
 }
 
 const columns: readonly Column[] = [
-  { id: "token", label: "Token", minWidth: 100 },
-  { id: "amount", label: "Amount", minWidth: 100 },
-  { id: "price", label: "Price", minWidth: 100 },
-  { id: "value", label: "Value", minWidth: 100 },
+  { id: 'token', label: 'Token', minWidth: 100 },
+  { id: 'amount', label: 'Amount', minWidth: 100 },
+  { id: 'price', label: 'Price', minWidth: 100 },
+  { id: 'value', label: 'Value', minWidth: 100 },
 ];
 
 export default function Home() {
   const [loading, setLoading] = React.useState(false);
-  const [toast, setToast] = React.useState("");
-  const [errorToast, setErrorToast] = React.useState("");
+  const [toast, setToast] = React.useState('');
+  const [errorToast, setErrorToast] = React.useState('');
 
   const post = async (
     path: string,
@@ -65,21 +65,21 @@ export default function Home() {
     try {
       let reqOpts: RequestOptions = {
         path: shared.kongAddress + path,
-        method: "POST",
+        method: 'POST',
       };
       if (postData) {
         reqOpts.headers = {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
         };
       } else {
         reqOpts.headers = {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         };
       }
       const req = request(reqOpts, (res) => {
-        res.setEncoding("utf8");
-        res.on("data", (chunk) => {
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
           const respData = JSON.parse(chunk);
           if (respData.code !== 0) {
             setErrorToast(respData.debugMessage);
@@ -88,10 +88,10 @@ export default function Home() {
           if (successAction) {
             successAction(respData);
           }
-          setToast("success");
+          setToast('success');
         });
       });
-      req.on("error", (e) => {
+      req.on('error', (e) => {
         throw e;
       });
       if (postData) {
@@ -111,27 +111,27 @@ export default function Home() {
   const handleChainChange = (event: SelectChangeEvent) => {
     setChain(event.target.value as string);
   };
-  const baseCoinList = ["ethereum"]
+  const baseCoinList = ['ethereum'];
   const [address, setAddress] = React.useState('');
   const [list, setList] = React.useState<any[]>([]);
   const [totalValue, setTotalValue] = React.useState('');
 
   const doSearch = async () => {
     post(
-      '/doom/getAssets/v1', 
+      '/doom/getAssets/v1',
       {
-        address:address,
+        address: address,
         chain: chain,
       },
-      (respData)=>{
+      (respData) => {
         if (respData.code != 0) {
           setErrorToast(respData.message);
-          return
+          return;
         }
         setList(respData.data.tokenAsset.assets);
         setTotalValue(respData.data.tokenAsset.totalValue);
       }
-    )
+    );
   };
 
   return (
@@ -141,28 +141,31 @@ export default function Home() {
         direction="column"
         alignItems="center"
         sx={{
-          padding: "1rem",
+          padding: '1rem',
         }}
       >
         <Stack
           spacing={2}
           alignItems="center"
           sx={{
-            padding: "1rem",
-            width: "100%",
+            padding: '1rem',
+            width: '100%',
           }}
           direction="row"
         >
           <Button
             variant="contained"
-            sx={{ height: "50px", width: "100px", margin: "5px" }}
-            onClick={debounce(doSearch, 10000, {'leading': true, 'trailing': false})}
+            sx={{ height: '50px', width: '100px', margin: '5px' }}
+            onClick={debounce(doSearch, 10000, {
+              leading: true,
+              trailing: false,
+            })}
           >
             Refresh
           </Button>
-          <FormControl 
+          <FormControl
             sx={{
-              width: "15%",
+              width: '15%',
             }}
           >
             <InputLabel id="demo-simple-select-label">Chain</InputLabel>
@@ -173,24 +176,34 @@ export default function Home() {
               label="Chain"
               onChange={handleChainChange}
             >
-              {baseCoinList && baseCoinList.map((item)=>(
-                <MenuItem value={item} key={item}>{item}</MenuItem>
-              ))}
+              {baseCoinList &&
+                baseCoinList.map((item) => (
+                  <MenuItem value={item} key={item}>
+                    {item}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
-          <FormControl 
+          <FormControl
             sx={{
-              width: "15%",
+              width: '15%',
             }}
           >
-            <TextField id="outlined-basic" label="Address" variant="outlined" onChange={(e)=>{setAddress(e.target.value)}} />
+            <TextField
+              id="outlined-basic"
+              label="Address"
+              variant="outlined"
+              onChange={(e) => {
+                setAddress(e.target.value);
+              }}
+            />
           </FormControl>
-          <FormControl 
+          <FormControl
             sx={{
-              width: "15%",
+              width: '15%',
             }}
           >
-             <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom>
               Total Value: ${totalValue}
             </Typography>
           </FormControl>
@@ -199,8 +212,8 @@ export default function Home() {
           spacing={2}
           alignItems="center"
           sx={{
-            padding: "1rem",
-            width: "100%",
+            padding: '1rem',
+            width: '100%',
           }}
           direction="row"
         >
@@ -220,75 +233,83 @@ export default function Home() {
                 </TableRow>
               </TableHead>
               <TableBody>
-              {list &&
-                list.map((row) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                      {columns.map((column) => {
-                        const value:any = row[column.id];
-                        if (column.id == "createdAt") {
-                          return (
-                            <TableCell key={column.id} align={column.align}>
-                              {moment(value)
-                                .local()
-                                .format("YYYY-MM-DD HH:mm:ss")}
-                            </TableCell>
-                          );
-                        } else if (column.id == "price" || column.id == "value") {
-                          return (
-                            <TableCell key={column.id} align={column.align}>
-                              ${value}
-                            </TableCell>
-                          );
-                        } else {
-                          return (
-                            <TableCell key={column.id} align={column.align}>
-                              {column.format !== undefined &&
-                              typeof value === "number"
-                                ? column.format(value)
-                                : value}
-                            </TableCell>
-                          );
-                        }
-                      })}
-                    </TableRow>
-                  );
-                })}
+                {list &&
+                  list.map((row) => {
+                    return (
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        tabIndex={-1}
+                        key={row.id}
+                      >
+                        {columns.map((column) => {
+                          const value: any = row[column.id];
+                          if (column.id == 'createdAt') {
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {moment(value)
+                                  .local()
+                                  .format('YYYY-MM-DD HH:mm:ss')}
+                              </TableCell>
+                            );
+                          } else if (
+                            column.id == 'price' ||
+                            column.id == 'value'
+                          ) {
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                ${value}
+                              </TableCell>
+                            );
+                          } else {
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {column.format !== undefined &&
+                                typeof value === 'number'
+                                  ? column.format(value)
+                                  : value}
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </TableContainer>
         </Stack>
       </Stack>
       <Snackbar
-        open={errorToast !== ""}
+        open={errorToast !== ''}
         autoHideDuration={5000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setErrorToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setErrorToast('')}
       >
         <Alert
-          onClose={() => setErrorToast("")}
+          onClose={() => setErrorToast('')}
           severity="error"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {errorToast}
         </Alert>
       </Snackbar>
       <Snackbar
-        open={toast !== ""}
+        open={toast !== ''}
         autoHideDuration={4500}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setToast('')}
       >
         <Alert
-          onClose={() => setToast("")}
+          onClose={() => setToast('')}
           severity="success"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {toast}
         </Alert>
       </Snackbar>
       <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
       >
         <CircularProgress color="inherit" />
