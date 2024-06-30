@@ -1,40 +1,41 @@
-"use client";
-import "./globals.css";
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
-import React from "react";
-import Link from "next/link";
-import { StyledEngineProvider } from "@mui/material/styles";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-import { usePathname } from "next/navigation";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
+'use client';
+import './globals.css';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import React from 'react';
+import Link from 'next/link';
+import { StyledEngineProvider } from '@mui/material/styles';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { usePathname } from 'next/navigation';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 const LINKS = [
-  { text: "Simple Encrypt", href: "/simple-encrypt" },
-  { text: "Encrypt", href: "/encrypt" },
-  { text: "Decrypt", href: "/decrypt" },
-  { text: "Backup", href: "/backup" },
-  { text: "Recovery", href: "/recovery" },
-  { text: "Import ABI", href: "/import-abi" },
-  { text: "Token", href: "/token" },
-  { text: "Asset", href: "/asset" },
-  { text: "Price", href: "/price" },
+  { text: 'Simple Encrypt', href: '/simple-encrypt' },
+  { text: 'Encrypt', href: '/encrypt' },
+  { text: 'Decrypt', href: '/decrypt' },
+  { text: 'Backup', href: '/backup' },
+  { text: 'Recovery', href: '/recovery' },
+  { text: 'Import ABI', href: '/import-abi' },
+  { text: 'Token', href: '/token' },
+  { text: 'Price', href: '/price' },
+  { text: 'Asset', href: '/asset' },
+  { text: 'Dapp Asset', href: '/dapp-asset' },
 ];
 
 function Container({ children }: { children: React.ReactNode }) {
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const theme = React.useMemo(
     () =>
       createTheme({
         palette: {
-          mode: prefersDarkMode ? "dark" : "light",
+          mode: prefersDarkMode ? 'dark' : 'light',
         },
       }),
     [prefersDarkMode]
@@ -59,7 +60,7 @@ function Container({ children }: { children: React.ReactNode }) {
   };
 
   const [loading, setLoading] = React.useState(false);
-  const [errorToast, setErrorToast] = React.useState("");
+  const [errorToast, setErrorToast] = React.useState('');
 
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -91,15 +92,15 @@ function Container({ children }: { children: React.ReactNode }) {
         {children}
       </ThemeProvider>
       <Snackbar
-        open={errorToast !== ""}
+        open={errorToast !== ''}
         autoHideDuration={5000}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setErrorToast("")}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={() => setErrorToast('')}
       >
         <Alert
-          onClose={() => setErrorToast("")}
+          onClose={() => setErrorToast('')}
           severity="error"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {errorToast}
         </Alert>
