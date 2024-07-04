@@ -27,6 +27,7 @@ const LINKS = [
   { text: 'Price', href: '/price' },
   { text: 'Asset', href: '/asset' },
   { text: 'Dapp Asset', href: '/dapp-asset' },
+  { text: 'Token Balance', href: '/token-balance' },
 ];
 
 function Container({ children }: { children: React.ReactNode }) {

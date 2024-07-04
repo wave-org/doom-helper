@@ -107,11 +107,11 @@ export default function Home() {
     }
   };
 
-  const [chain, setChain] = React.useState('ethereum');
+  const [chain, setChain] = React.useState('eth');
   const handleChainChange = (event: SelectChangeEvent) => {
     setChain(event.target.value as string);
   };
-  const baseCoinList = ['ethereum'];
+  const chainList = ['eth'];
   const [address, setAddress] = React.useState('');
   const [list, setList] = React.useState<any[]>([]);
   const [totalValue, setTotalValue] = React.useState('');
@@ -176,8 +176,8 @@ export default function Home() {
               label="Chain"
               onChange={handleChainChange}
             >
-              {baseCoinList &&
-                baseCoinList.map((item) => (
+              {chainList &&
+                chainList.map((item) => (
                   <MenuItem value={item} key={item}>
                     {item}
                   </MenuItem>

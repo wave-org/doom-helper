@@ -23,156 +23,28 @@ import CircularProgress from '@mui/material/CircularProgress';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { debounce } from 'lodash';
-import Box from '@mui/material/Box';
-import Collapse from '@mui/material/Collapse';
-import IconButton from '@mui/material/IconButton';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-interface DappAssetType {
-  name: string;
-  isDebt: boolean;
-  tokenAddress: string;
-  totalValue: string;
-  holdings: any[];
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+interface Column {
+  id: string;
+  label: string;
+  minWidth?: number;
+  align?: 'right';
+  format?: (value: number) => string;
 }
 
-function Row(props: { row: DappAssetType }) {
-  interface Column {
-    id: string;
-    label: string;
-    minWidth?: number;
-    align?: 'right';
-    format?: (value: number) => string;
-  }
-
-  const columns: readonly Column[] = [
-    { id: 'token', label: 'Token', minWidth: 100 },
-    { id: 'amount', label: 'Amount', minWidth: 100 },
-    { id: 'price', label: 'Price', minWidth: 100 },
-    { id: 'value', label: 'Value', minWidth: 100 },
-  ];
-
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
-
-  return (
-    <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.name}
-        </TableCell>
-        <TableCell sx={row.isDebt ? { color: 'red' } : { color: 'green' }}>
-          {row.isDebt ? 'Debt' : 'Supply'}
-        </TableCell>
-        <TableCell>{row.tokenAddress}</TableCell>
-        <TableCell>${row.totalValue}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Holdings
-              </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        style={{ minWidth: column.minWidth }}
-                      >
-                        {column.label}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.holdings.map((item) => {
-                    return (
-                      <TableRow
-                        hover
-                        role="checkbox"
-                        tabIndex={-1}
-                        key={item.token}
-                      >
-                        {columns.map((column) => {
-                          const value: any = item[column.id];
-                          if (column.id == 'createdAt') {
-                            return (
-                              <TableCell key={column.id} align={column.align}>
-                                {moment(value)
-                                  .local()
-                                  .format('YYYY-MM-DD HH:mm:ss')}
-                              </TableCell>
-                            );
-                          } else if (
-                            column.id == 'price' ||
-                            column.id == 'value'
-                          ) {
-                            return (
-                              <TableCell key={column.id} align={column.align}>
-                                ${value}
-                              </TableCell>
-                            );
-                          } else {
-                            return (
-                              <TableCell key={column.id} align={column.align}>
-                                {column.format !== undefined &&
-                                typeof value === 'number'
-                                  ? column.format(value)
-                                  : value}
-                              </TableCell>
-                            );
-                          }
-                        })}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
+const columns: readonly Column[] = [
+  { id: 'address', label: 'Token', minWidth: 100 },
+  { id: 'balance', label: 'Balance', minWidth: 100 },
+];
 
 export default function Home() {
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
-
-  interface Column {
-    id: string;
-    label: string;
-    minWidth?: number;
-    align?: 'right';
-    format?: (value: number) => string;
-  }
-
-  const columns: readonly Column[] = [
-    { id: 'name', label: 'Name', minWidth: 100 },
-    { id: 'isDebt', label: 'Type', minWidth: 100 },
-    { id: 'tokenAddress', label: 'TokenAddress', minWidth: 100 },
-    { id: 'totalValue', label: 'TotalValue', minWidth: 100 },
-  ];
-
   const [loading, setLoading] = React.useState(false);
   const [toast, setToast] = React.useState('');
   const [errorToast, setErrorToast] = React.useState('');
@@ -239,38 +111,23 @@ export default function Home() {
   };
   const chainList = ['eth'];
   const [address, setAddress] = React.useState('');
-  const [app, setApp] = React.useState('aave_v3');
-  const handleAppChange = (event: SelectChangeEvent) => {
-    setApp(event.target.value as string);
-  };
-  const appList = ['aave_v3', 'uniswap_v2'];
   const [list, setList] = React.useState<any[]>([]);
+  const [toBlock, setToBlock] = React.useState('');
 
   const doSearch = async () => {
     post(
-      '/doom/getDappAssets/v1',
+      '/doom/getTokenBalances/v1',
       {
         address: address,
         chain: chain,
-        app: app,
       },
       (respData) => {
         if (respData.code != 0) {
           setErrorToast(respData.message);
           return;
         }
-        // handle assets list
-        let ll: any[] = [];
-        respData.data.assets.map((ele: any) => {
-          ele.isDebt = false;
-          ll.push(ele);
-        });
-        respData.data.debts.map((ele: any) => {
-          ele.isDebt = true;
-          ll.push(ele);
-        });
-        console.log(ll);
-        setList(ll);
+        setList(respData.data.tokens);
+        setToBlock('0x' + respData.data.toBlock);
       }
     );
   };
@@ -309,27 +166,6 @@ export default function Home() {
               width: '15%',
             }}
           >
-            <InputLabel id="demo-simple-select-label">App</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={app}
-              label="App"
-              onChange={handleAppChange}
-            >
-              {appList &&
-                appList.map((item) => (
-                  <MenuItem value={item} key={item}>
-                    {item}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-          <FormControl
-            sx={{
-              width: '15%',
-            }}
-          >
             <InputLabel id="demo-simple-select-label">Chain</InputLabel>
             <Select
               labelId="demo-simple-select-label"
@@ -360,6 +196,15 @@ export default function Home() {
               }}
             />
           </FormControl>
+          <FormControl
+            sx={{
+              width: '15%',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              ToBlock: {toBlock}
+            </Typography>
+          </FormControl>
         </Stack>
         <Stack
           spacing={2}
@@ -374,7 +219,6 @@ export default function Home() {
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell />
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -387,9 +231,48 @@ export default function Home() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {list.map((item) => (
-                  <Row key={item.name} row={item} />
-                ))}
+                {list &&
+                  list.map((row) => {
+                    return (
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        tabIndex={-1}
+                        key={row.id}
+                      >
+                        {columns.map((column) => {
+                          const value: any = row[column.id];
+                          if (column.id == 'createdAt') {
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {moment(value)
+                                  .local()
+                                  .format('YYYY-MM-DD HH:mm:ss')}
+                              </TableCell>
+                            );
+                          } else if (
+                            column.id == 'price' ||
+                            column.id == 'value'
+                          ) {
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                ${value}
+                              </TableCell>
+                            );
+                          } else {
+                            return (
+                              <TableCell key={column.id} align={column.align}>
+                                {column.format !== undefined &&
+                                typeof value === 'number'
+                                  ? column.format(value)
+                                  : value}
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </TableContainer>
