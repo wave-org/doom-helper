@@ -8,16 +8,16 @@ pipeline {
                 sh """
                     docker build \
                         --build-arg env=test \
-                        -t nextsurfer/doom-helper:latest \
+                        -t waveorg/doom-helper:latest \
                         -f ./web/Dockerfile ./web
-                    docker stop doom-helper && docker rm doom-helper || echo 0
+                    docker stop waveorg-doom-helper && docker rm waveorg-doom-helper || echo 0
                     docker run -d \
                         --restart always \
-                        --name doom-helper \
+                        --name waveorg-doom-helper \
                         --dns ${HOST_IP} \
                         --dns 8.8.8.8 \
                         -p 10010:3000 \
-                        nextsurfer/doom-helper:latest
+                        waveorg/doom-helper:latest
                 """
             }
         }
@@ -34,16 +34,16 @@ pipeline {
                 git checkout dev
                 docker build \
                     --build-arg env=test \
-                    -t nextsurfer/doom-helper:latest \
+                    -t waveorg/doom-helper:latest \
                     -f ./web/Dockerfile ./web
-                docker stop doom-helper && docker rm doom-helper || echo 0
+                docker stop waveorg-doom-helper && docker rm waveorg-doom-helper || echo 0
                 docker run -d \
                     --restart always \
-                    --name doom-helper \
+                    --name waveorg-doom-helper \
                     --dns ${HOST_IP} \
                     --dns 8.8.8.8 \
                     -p 10010:3000 \
-                    nextsurfer/doom-helper:latest
+                    waveorg/doom-helper:latest
             """
         }
         cleanup {
