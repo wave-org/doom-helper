@@ -61,41 +61,32 @@ export default function Home() {
       postData = JSON.stringify(reqData);
     }
     try {
-      let reqOpts: RequestOptions = {
-        path: shared.kongAddress + path,
-        method: 'POST',
-      };
+      let reqOpts: any = {};
+      reqOpts.method = 'POST';
       if (postData) {
-        reqOpts.headers = {
+        reqOpts['headers'] = {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(postData),
         };
-      } else {
-        reqOpts.headers = {
-          'Content-Type': 'application/json',
-        };
+        reqOpts['body'] = postData;
       }
-      const req = request(reqOpts, (res) => {
-        res.setEncoding('utf8');
-        res.on('data', (chunk) => {
-          const respData = JSON.parse(chunk);
-          if (respData.code !== 0) {
-            setErrorToast(respData.debugMessage);
+      fetch(shared.kongAddress + path, reqOpts)
+        .then((resp) => {
+          return resp.json();
+        })
+        .then((data) => {
+          if (data.code !== 0) {
+            setErrorToast(data.debugMessage);
             return;
           }
           if (successAction) {
-            successAction(respData);
+            successAction(data);
           }
           setToast('success');
+        })
+        .then((err) => {
+          throw err;
         });
-      });
-      req.on('error', (e) => {
-        throw e;
-      });
-      if (postData) {
-        req.write(postData);
-      }
-      req.end();
 
       setLoading(false);
     } catch (error) {
