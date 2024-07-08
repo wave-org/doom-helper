@@ -40,10 +40,8 @@ interface Column {
 }
 
 const columns: readonly Column[] = [
-  { id: 'token', label: 'Token', minWidth: 100 },
-  { id: 'amount', label: 'Amount', minWidth: 100 },
-  { id: 'price', label: 'Price', minWidth: 100 },
-  { id: 'value', label: 'Value', minWidth: 100 },
+  { id: 'address', label: 'Token', minWidth: 100 },
+  { id: 'balance', label: 'Balance', minWidth: 100 },
 ];
 
 export default function Home() {
@@ -63,41 +61,32 @@ export default function Home() {
       postData = JSON.stringify(reqData);
     }
     try {
-      let reqOpts: RequestOptions = {
-        path: shared.kongAddress + path,
-        method: 'POST',
-      };
+      let reqOpts: any = {};
+      reqOpts.method = 'POST';
       if (postData) {
-        reqOpts.headers = {
+        reqOpts['headers'] = {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(postData),
         };
-      } else {
-        reqOpts.headers = {
-          'Content-Type': 'application/json',
-        };
+        reqOpts['body'] = postData;
       }
-      const req = request(reqOpts, (res) => {
-        res.setEncoding('utf8');
-        res.on('data', (chunk) => {
-          const respData = JSON.parse(chunk);
-          if (respData.code !== 0) {
-            setErrorToast(respData.debugMessage);
+      fetch(shared.kongAddress + path, reqOpts)
+        .then((resp) => {
+          return resp.json();
+        })
+        .then((data) => {
+          if (data.code !== 0) {
+            setErrorToast(data.debugMessage);
             return;
           }
           if (successAction) {
-            successAction(respData);
+            successAction(data);
           }
           setToast('success');
+        })
+        .then((err) => {
+          throw err;
         });
-      });
-      req.on('error', (e) => {
-        throw e;
-      });
-      if (postData) {
-        req.write(postData);
-      }
-      req.end();
 
       setLoading(false);
     } catch (error) {
@@ -107,18 +96,18 @@ export default function Home() {
     }
   };
 
-  const [chain, setChain] = React.useState('ethereum');
+  const [chain, setChain] = React.useState('eth');
   const handleChainChange = (event: SelectChangeEvent) => {
     setChain(event.target.value as string);
   };
-  const baseCoinList = ['ethereum'];
+  const chainList = ['eth'];
   const [address, setAddress] = React.useState('');
   const [list, setList] = React.useState<any[]>([]);
-  const [totalValue, setTotalValue] = React.useState('');
+  const [toBlock, setToBlock] = React.useState('');
 
   const doSearch = async () => {
     post(
-      '/doom/getAssets/v1',
+      '/doom/getTokenBalances/v1',
       {
         address: address,
         chain: chain,
@@ -128,8 +117,8 @@ export default function Home() {
           setErrorToast(respData.message);
           return;
         }
-        setList(respData.data.tokenAsset.assets);
-        setTotalValue(respData.data.tokenAsset.totalValue);
+        setList(respData.data.tokens);
+        setToBlock('0x' + respData.data.toBlock);
       }
     );
   };
@@ -176,8 +165,8 @@ export default function Home() {
               label="Chain"
               onChange={handleChainChange}
             >
-              {baseCoinList &&
-                baseCoinList.map((item) => (
+              {chainList &&
+                chainList.map((item) => (
                   <MenuItem value={item} key={item}>
                     {item}
                   </MenuItem>
@@ -204,7 +193,7 @@ export default function Home() {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              Total Value: ${totalValue}
+              ToBlock: {toBlock}
             </Typography>
           </FormControl>
         </Stack>
