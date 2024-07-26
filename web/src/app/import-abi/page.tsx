@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { encode } from '@doomjs/animated-qrcode';
 import QRCode from 'qrcode';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
@@ -21,7 +22,7 @@ export default function Home() {
   const [abiJson, setAbiJson] = React.useState('');
 
   const [qrDataLen, setQrDataLen] = React.useState(400);
-  const [showInterval, setShowInterval] = React.useState(0.4 * 1000);
+  const [showInterval, setShowInterval] = React.useState(0.6 * 1000);
   const [b64Data, setB64Data] = React.useState('');
   const [qrData, setQrData] = React.useState('');
   const timerRef = React.useRef<NodeJS.Timer | null>(null);
@@ -45,33 +46,21 @@ export default function Home() {
       setErrorToast('abi json array length is empty');
       return;
     }
-    let b64data = btoa(JSON.stringify(json));
-    console.log('b64data.length ==>', b64data.length);
-    setB64Data(b64data);
-    let arr: string[] = [];
-    for (let f = 0; f < b64data.length; ) {
-      let l = f + qrDataLen;
-      if (l > b64data.length) {
-        l = b64data.length;
-      }
-      arr.push(b64data.slice(f, l));
-      f = l;
-    }
+
+    const fragments = encode(JSON.stringify(json));
     // clear previous interval timer
     clearInterval(timerRef.current as NodeJS.Timer);
     timerRef.current = null;
     // set new interval timer
     let canvas = document.getElementById('qrcode');
     let a = 0;
-    let b = arr.length;
+    let b = fragments.length;
     timerRef.current = setInterval(() => {
       if (a == b) {
         a = 0;
       }
-      let prefix = 'DOOM|AQR|' + a + '/' + b + '|';
-      setQrData(prefix + arr[a]);
-      console.log('prefix ==>', prefix);
-      QRCode.toCanvas(canvas, prefix + arr[a], { width: 300 }, (err: any) => {
+      setQrData(fragments[a]);
+      QRCode.toCanvas(canvas, fragments[a], { width: 300 }, (err: any) => {
         if (err) setErrorToast(err);
       });
       a++;
