@@ -23,6 +23,7 @@ const LINKS = [
   { text: 'Backup', href: '/backup' },
   { text: 'Recovery', href: '/recovery' },
   { text: 'Import ABI', href: '/import-abi' },
+  { text: 'Sign Request', href: '/signrequest' },
 ];
 
 function Container({ children }: { children: React.ReactNode }) {
