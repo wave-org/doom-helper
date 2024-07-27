@@ -38,7 +38,7 @@ export default function Home() {
         abi.stateMutability !== 'view' &&
         abi.stateMutability !== 'pure'
       ) {
-        abi.outputs = [];
+        // abi.outputs = [];
         json.push(abi);
       }
     });
