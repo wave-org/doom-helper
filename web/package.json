@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@doomjs/animated-qrcode": "^0.1.1",
+    "@doomjs/animated-qrcode": "^0.1.2",
     "@doomjs/evm-sign-request": "^0.0.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",

@@ -91,12 +91,23 @@ export default function Home() {
       // set new interval timer
       let canvas = document.getElementById('qrcode');
       const encoder = request.toUREncoder(400, 0, 10);
-      timer = setInterval(() => {
-        const nextPart = encoder.nextPart();
-        QRCode.toCanvas(canvas, nextPart, { width: 300 }, (err: any) => {
-          if (err) setErrorToast(err);
-        });
-      }, 600);
+      if (encoder.fragments.length > 1) {
+        timer = setInterval(() => {
+          const nextPart = encoder.nextPart();
+          QRCode.toCanvas(canvas, nextPart, { width: 500 }, (err: any) => {
+            if (err) setErrorToast(err);
+          });
+        }, 800);
+      } else {
+        QRCode.toCanvas(
+          canvas,
+          encoder.nextPart(),
+          { width: 500 },
+          (err: any) => {
+            if (err) setErrorToast(err);
+          }
+        );
+      }
     } catch (err) {
       setErrorToast((err as Error).message);
     }
@@ -278,8 +289,7 @@ export default function Home() {
             </Button>
           </Stack>
         )}
-
-        <Stack direction="row" textAlign="center" justifyContent="left">
+        <Stack direction="row" justifyContent="center" padding="50px">
           <canvas id="qrcode"></canvas>
         </Stack>
       </Stack>

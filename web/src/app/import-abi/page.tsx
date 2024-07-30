@@ -16,16 +16,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+let timer: NodeJS.Timer;
+
 export default function Home() {
   const [toast, setToast] = React.useState('');
   const [errorToast, setErrorToast] = React.useState('');
   const [abiJson, setAbiJson] = React.useState('');
 
-  const [qrDataLen, setQrDataLen] = React.useState(400);
-  const [showInterval, setShowInterval] = React.useState(0.6 * 1000);
-  const [b64Data, setB64Data] = React.useState('');
-  const [qrData, setQrData] = React.useState('');
-  const timerRef = React.useRef<NodeJS.Timer | null>(null);
+  const [showInterval, setShowInterval] = React.useState(0.8 * 1000);
 
   const doGenerate = async () => {
     if (abiJson.length <= 0) {
@@ -47,20 +45,16 @@ export default function Home() {
       return;
     }
 
-    const fragments = encode(JSON.stringify(json));
-    // clear previous interval timer
-    clearInterval(timerRef.current as NodeJS.Timer);
-    timerRef.current = null;
-    // set new interval timer
+    const fragments = encode(JSON.stringify(json), 320, 40);
+    if (timer) clearInterval(timer);
     let canvas = document.getElementById('qrcode');
     let a = 0;
     let b = fragments.length;
-    timerRef.current = setInterval(() => {
+    timer = setInterval(() => {
       if (a == b) {
         a = 0;
       }
-      setQrData(fragments[a]);
-      QRCode.toCanvas(canvas, fragments[a], { width: 300 }, (err: any) => {
+      QRCode.toCanvas(canvas, fragments[a], { width: 600 }, (err: any) => {
         if (err) setErrorToast(err);
       });
       a++;
@@ -110,31 +104,7 @@ export default function Home() {
             Step 3: Results
           </Typography>
         </Stack>
-        {/* <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="b64Data"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={10}
-            disabled
-            value={b64Data}
-          />
-        </Stack>
-        <Stack direction="row" textAlign="center" justifyContent="left">
-          <TextField
-            id="outlined-basic"
-            label="qrData"
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={10}
-            disabled
-            value={qrData}
-          />
-        </Stack> */}
-        <Stack direction="row" textAlign="center" justifyContent="left">
+        <Stack direction="row" justifyContent="center" padding="40px">
           <canvas id="qrcode"></canvas>
         </Stack>
       </Stack>

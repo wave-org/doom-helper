@@ -172,12 +172,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@doomjs/animated-qrcode@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@doomjs/animated-qrcode@npm:0.1.1"
+"@doomjs/animated-qrcode@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@doomjs/animated-qrcode@npm:0.1.2"
   dependencies:
     "@types/jest": "npm:^29.5.12"
-  checksum: 10c0/2926139d8ceb999f5551d1a804d5521d756baf8064d859e695a176885281744b03e702b8d5209c9deb17eb96fa4837a713e837e46f727741ce706df2177a5397
+  checksum: 10c0/f14177d557a8379ccd682175b7c01c7fc6f08a8bce6d27827acc5d31ce7d36d6cc08ed43622d3e10e347a51b35c2afc3241d5b89703cc4eb5b7d7094697884fb
   languageName: node
   linkType: hard
 
@@ -2471,7 +2471,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "doom-helper@workspace:."
   dependencies:
-    "@doomjs/animated-qrcode": "npm:^0.1.1"
+    "@doomjs/animated-qrcode": "npm:^0.1.2"
     "@doomjs/evm-sign-request": "npm:^0.0.1"
     "@emotion/react": "npm:^11.11.1"
     "@emotion/styled": "npm:^11.11.0"
